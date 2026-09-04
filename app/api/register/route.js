@@ -73,7 +73,8 @@ export async function POST(request) {
     return NextResponse.json(
       {
         message:
-          "Pendaftaran gagal. Di Vercel, set NEXTAUTH_SECRET dan DATABASE_URL (PostgreSQL) pada Environment Variables.",
+          error.message ||
+          "Pendaftaran gagal. Isi DATABASE_URL PostgreSQL (Neon) di .env.local dan di Vercel.",
       },
       { status: 500 }
     );
