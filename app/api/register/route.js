@@ -5,7 +5,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const name = String(body.name || "").trim();
-    const username = String(body.username || "").trim();
+    const username = String(body.username || "").trim().toLowerCase();
     const email = String(body.email || "").trim().toLowerCase();
     const password = String(body.password || "");
     const confirmPassword = String(body.confirmPassword || "");
@@ -20,6 +20,13 @@ export async function POST(request) {
     if (username.length < 3) {
       return NextResponse.json(
         { message: "Username minimal 3 karakter." },
+        { status: 400 }
+      );
+    }
+
+    if (!/^[a-z0-9._-]+$/.test(username)) {
+      return NextResponse.json(
+        { message: "Username hanya boleh huruf, angka, titik, underscore, atau strip." },
         { status: 400 }
       );
     }
@@ -45,25 +52,29 @@ export async function POST(request) {
       );
     }
 
-    if (usernameExists(username)) {
+    if (await usernameExists(username)) {
       return NextResponse.json(
         { message: "Username sudah digunakan." },
         { status: 409 }
       );
     }
 
-    if (emailExists(email)) {
+    if (await emailExists(email)) {
       return NextResponse.json(
         { message: "Email sudah terdaftar." },
         { status: 409 }
       );
     }
 
-    createUser({ username, email, name, password });
+    await createUser({ username, email, name, password, role: "USER" });
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error("REGISTER_ERROR", error);
     return NextResponse.json(
-      { message: "Pendaftaran gagal. Coba lagi." },
+      {
+        message:
+          "Pendaftaran gagal. Di Vercel, set NEXTAUTH_SECRET dan DATABASE_URL (PostgreSQL) pada Environment Variables.",
+      },
       { status: 500 }
     );
   }

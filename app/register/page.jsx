@@ -5,6 +5,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import BrandMark from "@/components/BrandMark";
+import GoogleButton from "@/components/GoogleButton";
 
 const initialForm = {
   name: "",
@@ -62,7 +63,9 @@ export default function RegisterPage() {
     setLoading(false);
 
     if (result?.error) {
-      router.push("/login");
+      setError(
+        "Akun berhasil dibuat, tetapi login otomatis gagal. Buka halaman Masuk dan gunakan username serta kata sandi yang baru saja didaftarkan."
+      );
       return;
     }
 
@@ -76,10 +79,20 @@ export default function RegisterPage() {
         <BrandMark />
         <h1 className="font-display text-3xl text-white">Buat akun</h1>
         <p className="mt-2 text-sm text-white/60">
-          Daftar jika belum punya akun, lalu lanjut ke halaman beranda.
+          Daftar dengan Gmail atau isi formulir di bawah, lalu lanjut ke beranda.
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-8 grid gap-4">
+        <div className="mt-8">
+          <GoogleButton />
+        </div>
+
+        <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-white/35">
+          <span className="h-px flex-1 bg-white/10" />
+          atau
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="grid gap-4">
           <label className="block">
             <span className="mb-2 block text-sm text-white/70">Nama lengkap</span>
             <input

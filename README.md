@@ -1,43 +1,32 @@
-# Prototipe Ticketing Event — Halaman Login
+# Prototipe Ticketing Event — Login
 
-Aplikasi Next.js (Node.js) untuk prototipe ticketing event. Tahap ini hanya mencakup autentikasi: masuk, daftar, beranda, dan keluar.
+## Penyebab error Vercel `NO_SECRET`
 
-## Menjalankan di komputer
+File `.env.local` **tidak ikut ter-deploy**. NextAuth di production wajib punya `NEXTAUTH_SECRET`.
 
-1. Salin file lingkungan:
+Di Vercel → project **ticketin** → **Settings** → **Environment Variables**, tambahkan:
 
-```bash
-copy .env.example .env.local
-```
+| Nama | Nilai |
+|---|---|
+| `NEXTAUTH_SECRET` | string acak panjang (boleh sama dengan isi `.env.local`) |
+| `NEXTAUTH_URL` | `https://ticketin.vercel.app` |
+| `DATABASE_URL` | URL PostgreSQL (Neon), mulai `postgresql://...` |
 
-2. Isi `NEXTAUTH_SECRET` dengan string acak.
-3. Instal dan jalankan:
+Lalu **Redeploy**.
+
+Tanpa `DATABASE_URL`, daftar di Vercel hanya tersimpan sementara. Agar akun baru permanen, buat database gratis di [Neon](https://neon.tech) lalu tempel connection string ke `DATABASE_URL`.
+
+## Akun uji
+
+| Username | Kata sandi | Peran |
+|---|---|---|
+| demo | demo123 | Peserta |
+| admin | admin123 | Admin |
+| fajrunsh | 12345678 | Peserta |
+
+## Lokal
 
 ```bash
 npm install
 npm run dev
 ```
-
-Buka [http://localhost:3000](http://localhost:3000).
-
-Akun uji: **demo** / **demo123**
-
-## Login Gmail (opsional)
-
-1. Buat kredensial OAuth di [Google Cloud Console](https://console.cloud.google.com/).
-2. Authorized redirect URI:
-
-- Lokal: `http://localhost:3000/api/auth/callback/google`
-- Vercel: `https://NAMA-PROYEK.vercel.app/api/auth/callback/google`
-
-3. Isi `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` di `.env.local` (dan di pengaturan Environment Variables Vercel).
-
-## Deploy Vercel
-
-Set variabel:
-
-- `NEXTAUTH_URL` = URL Vercel, contoh `https://NAMA-PROYEK.vercel.app`
-- `NEXTAUTH_SECRET`
-- `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` (jika memakai Gmail)
-
-Catatan: pendaftaran username/password disimpan di `data/users.json`. Di Vercel filesystem tidak persisten, jadi login Gmail lebih andal untuk demo online. Lokal, pendaftaran berfungsi penuh.

@@ -3,11 +3,10 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 
-export default function GoogleButton({ enabled }) {
+export default function GoogleButton() {
   const [loading, setLoading] = useState(false);
 
   async function handleGoogle() {
-    if (!enabled) return;
     setLoading(true);
     await signIn("google", { callbackUrl: "/home" });
   }
@@ -17,7 +16,7 @@ export default function GoogleButton({ enabled }) {
       <button
         type="button"
         onClick={handleGoogle}
-        disabled={!enabled || loading}
+        disabled={loading}
         className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">

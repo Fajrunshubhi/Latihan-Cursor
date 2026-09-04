@@ -46,7 +46,7 @@ export default function LoginForm({ googleEnabled }) {
 
   return (
     <main className="auth-shell min-h-screen grid lg:grid-cols-2">
-      <section className="relative hidden overflow-hidden border-r border-white/10 p-12 lg:flex lg:flex-col lg:justify-between">
+      <section className="relative hidden overflow-hidden p-12 lg:flex lg:flex-col lg:justify-between">
         <BrandMark />
         <div>
           <p className="mb-4 text-sm font-medium uppercase tracking-[0.28em] text-gold-400">
@@ -69,7 +69,7 @@ export default function LoginForm({ googleEnabled }) {
           </div>
           <h2 className="font-display text-3xl text-white">Masuk</h2>
           <p className="mt-2 text-sm text-white/60">
-            Gunakan akun Gmail atau username dan kata sandi.
+            Gunakan akun gmail atau username dan kata sandi.
           </p>
 
           <div className="mt-8">

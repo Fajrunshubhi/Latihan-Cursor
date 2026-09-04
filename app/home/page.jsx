@@ -34,10 +34,20 @@ export default async function HomePage() {
             Anda berhasil masuk ke aplikasi ticketing event. Fitur pemesanan tiket,
             pembayaran, dan validasi peserta akan ditambahkan pada tahap berikutnya.
           </p>
-          <dl className="mt-10 grid gap-4 sm:grid-cols-2">
+          <dl className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-white/10 bg-ink/40 p-5">
+              <dt className="text-sm text-white/45">Username</dt>
+              <dd className="mt-1 text-white">{session.user?.username || "-"}</dd>
+            </div>
             <div className="rounded-2xl border border-white/10 bg-ink/40 p-5">
               <dt className="text-sm text-white/45">Email</dt>
               <dd className="mt-1 text-white">{session.user?.email || "-"}</dd>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-ink/40 p-5">
+              <dt className="text-sm text-white/45">Peran</dt>
+              <dd className="mt-1 text-white">
+                {session.user?.role === "ADMIN" ? "Admin" : "Peserta"}
+              </dd>
             </div>
             <div className="rounded-2xl border border-white/10 bg-ink/40 p-5">
               <dt className="text-sm text-white/45">Metode masuk</dt>
