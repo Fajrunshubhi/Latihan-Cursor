@@ -1,4 +1,4 @@
-export default function BrandMark({ compact = false }) {
+export default function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
     <div className={`flex items-center gap-3 ${compact ? "" : "mb-8"}`}>
       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold-500 text-ink shadow-lg shadow-gold-500/20">

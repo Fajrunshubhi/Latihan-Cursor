@@ -1,5 +1,6 @@
 "use client";
 
+import type { ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -7,7 +8,15 @@ import { useEffect, useState } from "react";
 import BrandMark from "@/components/BrandMark";
 import GoogleButton from "@/components/GoogleButton";
 
-const initialForm = {
+type RegisterForm = {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+const initialForm: RegisterForm = {
   name: "",
   username: "",
   email: "",
@@ -18,7 +27,7 @@ const initialForm = {
 export default function RegisterPage() {
   const router = useRouter();
   const { status } = useSession();
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState<RegisterForm>(initialForm);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,13 +37,13 @@ export default function RegisterPage() {
     }
   }, [status, router]);
 
-  function updateField(field) {
-    return (event) => {
+  function updateField(field: keyof RegisterForm) {
+    return (event: ChangeEvent<HTMLInputElement>) => {
       setForm((current) => ({ ...current, [field]: event.target.value }));
     };
   }
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setLoading(true);
@@ -45,7 +54,7 @@ export default function RegisterPage() {
       body: JSON.stringify(form),
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data = (await response.json().catch(() => ({}))) as { message?: string };
 
     if (!response.ok) {
       setLoading(false);

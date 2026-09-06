@@ -12,7 +12,9 @@ export async function GET() {
     }
 
     const sql = await ensurePostgres();
-    const rows = await sql`SELECT COUNT(*)::int AS count FROM users`;
+    const rows = (await sql`SELECT COUNT(*)::int AS count FROM users`) as {
+      count: number;
+    }[];
 
     return NextResponse.json({
       ok: true,
@@ -20,8 +22,9 @@ export async function GET() {
       users: rows[0].count,
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Database error";
     return NextResponse.json(
-      { ok: false, storage: "none", message: error.message },
+      { ok: false, storage: "none", message },
       { status: 500 }
     );
   }

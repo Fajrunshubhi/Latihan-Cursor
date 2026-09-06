@@ -1,5 +1,7 @@
 # TicketIn — Login Prototipe
 
+Proyek ini memakai **Next.js 14 + TypeScript**.
+
 Akun disimpan di **PostgreSQL (Neon)**. Tabel `users` dibuat otomatis saat aplikasi pertama kali terhubung.
 
 ## 1. Buat database Neon (gratis)
@@ -31,11 +33,11 @@ DATABASE_URL=postgresql://neondb_owner:xxxx@ep-xxxx.ap-southeast-1.aws.neon.tech
 
 ```bash
 npm install
-npm run db:check
+npm run db-check
 npm run dev
 ```
 
-`npm run db:check` harus menampilkan `Koneksi PostgreSQL berhasil.`
+`npm run db-check` harus menampilkan `Koneksi PostgreSQL berhasil.`
 
 4. Buka [http://localhost:3000](http://localhost:3000), daftar akun baru.
 5. Cek datanya di Neon: project → **Tables** → `users`.
@@ -84,6 +86,6 @@ Pakai domain yang sama dengan `NEXTAUTH_URL`, bukan URL deploy unik (`xxx-xxx.ve
 
 ```bash
 npm install
-npm run db:check
+npm run db-check
 npm run dev
 ```

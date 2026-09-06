@@ -8,12 +8,13 @@ import {
   seedAccounts,
   usePostgres,
 } from "./db";
+import type { AppUser, CreateUserInput, GoogleUserInput, PgUserRow } from "./types";
 
-function usersFilePath() {
+function usersFilePath(): string {
   return path.join(process.cwd(), "data", "users.json");
 }
 
-function mapSeedUsers() {
+function mapSeedUsers(): AppUser[] {
   return seedAccounts.map((account) => ({
     id: account.id,
     username: account.username,
@@ -26,10 +27,10 @@ function mapSeedUsers() {
   }));
 }
 
-function readJsonUsers() {
+function readJsonUsers(): AppUser[] {
   try {
     const raw = fs.readFileSync(usersFilePath(), "utf8");
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as AppUser[];
     if (Array.isArray(parsed) && parsed.length > 0) return parsed;
   } catch {
     // file belum ada
@@ -37,24 +38,26 @@ function readJsonUsers() {
   return mapSeedUsers();
 }
 
-function writeJsonUsers(users) {
+function writeJsonUsers(users: AppUser[]): void {
   const file = usersFilePath();
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, JSON.stringify(users, null, 2), "utf8");
 }
 
-export async function findUserByUsernameOrEmail(identifier) {
+export async function findUserByUsernameOrEmail(
+  identifier: string
+): Promise<AppUser | null> {
   assertDatabase();
   const value = String(identifier || "").trim().toLowerCase();
   if (!value) return null;
 
   if (usePostgres()) {
     const sql = await ensurePostgres();
-    const rows = await sql`
+    const rows = (await sql`
       SELECT * FROM users
       WHERE lower(username) = ${value} OR lower(email) = ${value}
       LIMIT 1
-    `;
+    `) as PgUserRow[];
     return mapPgUser(rows[0]);
   }
 
@@ -66,21 +69,27 @@ export async function findUserByUsernameOrEmail(identifier) {
   );
 }
 
-export async function usernameExists(username) {
+export async function usernameExists(username: string): Promise<boolean> {
   const user = await findUserByUsernameOrEmail(username);
   return Boolean(
     user && user.username.toLowerCase() === String(username).trim().toLowerCase()
   );
 }
 
-export async function emailExists(email) {
+export async function emailExists(email: string): Promise<boolean> {
   const user = await findUserByUsernameOrEmail(email);
   return Boolean(
     user && user.email.toLowerCase() === String(email).trim().toLowerCase()
   );
 }
 
-export async function createUser({ username, email, name, password, role = "USER" }) {
+export async function createUser({
+  username,
+  email,
+  name,
+  password,
+  role = "USER",
+}: CreateUserInput): Promise<Pick<AppUser, "id" | "username" | "email" | "name" | "role">> {
   assertDatabase();
   const normalizedUsername = username.trim().toLowerCase();
   const normalizedEmail = email.trim().toLowerCase();
@@ -89,16 +98,26 @@ export async function createUser({ username, email, name, password, role = "USER
 
   if (usePostgres()) {
     const sql = await ensurePostgres();
-    const rows = await sql`
+    const rows = (await sql`
       INSERT INTO users (id, name, username, email, password_hash, role)
       VALUES (${id}, ${name.trim()}, ${normalizedUsername}, ${normalizedEmail}, ${passwordHash}, ${role})
       RETURNING *
-    `;
-    return mapPgUser(rows[0]);
+    `) as PgUserRow[];
+    const created = mapPgUser(rows[0]);
+    if (!created) {
+      throw new Error("Gagal membuat akun.");
+    }
+    return {
+      id: created.id,
+      username: created.username,
+      email: created.email,
+      name: created.name,
+      role: created.role,
+    };
   }
 
   const users = readJsonUsers();
-  const user = {
+  const user: AppUser = {
     id,
     username: normalizedUsername,
     email: normalizedEmail,
@@ -119,7 +138,11 @@ export async function createUser({ username, email, name, password, role = "USER
   };
 }
 
-export async function upsertGoogleUser({ email, name, googleId }) {
+export async function upsertGoogleUser({
+  email,
+  name,
+  googleId,
+}: GoogleUserInput): Promise<AppUser | null> {
   assertDatabase();
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!normalizedEmail) return null;
@@ -129,13 +152,13 @@ export async function upsertGoogleUser({ email, name, googleId }) {
   if (usePostgres()) {
     const sql = await ensurePostgres();
     if (existing) {
-      const rows = await sql`
+      const rows = (await sql`
         UPDATE users
         SET google_id = COALESCE(google_id, ${googleId}),
             name = COALESCE(name, ${name || existing.name})
         WHERE id = ${existing.id}
         RETURNING *
-      `;
+      `) as PgUserRow[];
       return mapPgUser(rows[0]);
     }
 
@@ -147,11 +170,11 @@ export async function upsertGoogleUser({ email, name, googleId }) {
       suffix += 1;
     }
 
-    const rows = await sql`
+    const rows = (await sql`
       INSERT INTO users (id, name, username, email, role, google_id)
       VALUES (${`user-${Date.now()}`}, ${name || username}, ${username}, ${normalizedEmail}, ${"USER"}, ${googleId})
       RETURNING *
-    `;
+    `) as PgUserRow[];
     return mapPgUser(rows[0]);
   }
 
@@ -161,7 +184,7 @@ export async function upsertGoogleUser({ email, name, googleId }) {
     users[index] = {
       ...users[index],
       googleId: users[index].googleId || googleId,
-      name: users[index].name || name,
+      name: users[index].name || name || users[index].name,
     };
     writeJsonUsers(users);
     return users[index];
@@ -175,7 +198,7 @@ export async function upsertGoogleUser({ email, name, googleId }) {
     suffix += 1;
   }
 
-  const user = {
+  const user: AppUser = {
     id: `user-${Date.now()}`,
     username,
     email: normalizedEmail,

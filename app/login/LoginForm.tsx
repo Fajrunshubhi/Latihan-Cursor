@@ -1,5 +1,6 @@
 "use client";
 
+import type { FormEvent } from "react";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -7,7 +8,7 @@ import { useEffect, useState } from "react";
 import BrandMark from "@/components/BrandMark";
 import GoogleButton from "@/components/GoogleButton";
 
-export default function LoginForm({ googleEnabled }) {
+export default function LoginForm() {
   const router = useRouter();
   const { status } = useSession();
   const [username, setUsername] = useState("");
@@ -21,7 +22,7 @@ export default function LoginForm({ googleEnabled }) {
     }
   }, [status, router]);
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setLoading(true);
@@ -73,7 +74,7 @@ export default function LoginForm({ googleEnabled }) {
           </p>
 
           <div className="mt-8">
-            <GoogleButton enabled={googleEnabled} />
+            <GoogleButton />
           </div>
 
           <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-white/35">

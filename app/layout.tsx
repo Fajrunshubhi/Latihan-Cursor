@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Fraunces, Outfit } from "next/font/google";
 import AuthProvider from "@/components/AuthProvider";
 import "./globals.css";
@@ -12,13 +14,13 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "TicketIn | Login Event Ticketing",
   description:
     "Aplikasi ticketing event untuk pemesanan tiket, pembayaran, dan validasi peserta.",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
       <body className={`${outfit.variable} ${fraunces.variable} font-sans antialiased`}>

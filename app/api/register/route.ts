@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import { createUser, emailExists, usernameExists } from "@/lib/users";
 
-export async function POST(request) {
+type RegisterBody = {
+  name?: string;
+  username?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+};
+
+export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as RegisterBody;
     const name = String(body.name || "").trim();
     const username = String(body.username || "").trim().toLowerCase();
     const email = String(body.email || "").trim().toLowerCase();
@@ -70,13 +78,10 @@ export async function POST(request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("REGISTER_ERROR", error);
-    return NextResponse.json(
-      {
-        message:
-          error.message ||
-          "Pendaftaran gagal. Isi DATABASE_URL PostgreSQL (Neon) di .env.local dan di Vercel.",
-      },
-      { status: 500 }
-    );
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Pendaftaran gagal. Isi DATABASE_URL PostgreSQL (Neon) di .env.local dan di Vercel.";
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

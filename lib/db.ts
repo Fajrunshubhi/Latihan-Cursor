@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import { neon } from "@neondatabase/serverless";
+import type { AppUser, PgUserRow, SeedAccount, UserRole } from "./types";
 
-export const seedAccounts = [
+export const seedAccounts: SeedAccount[] = [
   {
     id: "seed-demo",
     username: "demo",
@@ -28,11 +29,11 @@ export const seedAccounts = [
   },
 ];
 
-export function usePostgres() {
+export function usePostgres(): boolean {
   return /^(postgres|postgresql):\/\//i.test(process.env.DATABASE_URL || "");
 }
 
-export function assertDatabase() {
+export function assertDatabase(): void {
   if (usePostgres()) return;
 
   if (process.env.VERCEL) {
@@ -46,7 +47,7 @@ export function getSql() {
   if (!usePostgres()) {
     throw new Error("DATABASE_URL harus diawali postgresql:// atau postgres://");
   }
-  return neon(process.env.DATABASE_URL);
+  return neon(process.env.DATABASE_URL as string);
 }
 
 let postgresReady = false;
@@ -79,7 +80,7 @@ export async function ensurePostgres() {
   return sql;
 }
 
-export function mapPgUser(row) {
+export function mapPgUser(row: PgUserRow | undefined | null): AppUser | null {
   if (!row) return null;
   return {
     id: row.id,
@@ -92,3 +93,5 @@ export function mapPgUser(row) {
     createdAt: row.created_at,
   };
 }
+
+export type { AppUser, UserRole };

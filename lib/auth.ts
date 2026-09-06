@@ -1,3 +1,4 @@
+import type { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
@@ -6,42 +7,40 @@ import { findUserByUsernameOrEmail, upsertGoogleUser } from "./users";
 
 ensureAuthEnv();
 
-const providers = [
-  GoogleProvider({
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    allowDangerousEmailAccountLinking: true,
-  }),
-  CredentialsProvider({
-    name: "Akun Event",
-    credentials: {
-      username: { label: "Username", type: "text" },
-      password: { label: "Password", type: "password" },
-    },
-    async authorize(credentials) {
-      const username = credentials?.username?.trim().toLowerCase();
-      const password = credentials?.password;
-      if (!username || !password) return null;
+export const authOptions: AuthOptions = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      allowDangerousEmailAccountLinking: true,
+    }),
+    CredentialsProvider({
+      name: "Akun Event",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const username = credentials?.username?.trim().toLowerCase();
+        const password = credentials?.password;
+        if (!username || !password) return null;
 
-      const user = await findUserByUsernameOrEmail(username);
-      if (!user?.passwordHash) return null;
+        const user = await findUserByUsernameOrEmail(username);
+        if (!user?.passwordHash) return null;
 
-      const valid = await bcrypt.compare(password, user.passwordHash);
-      if (!valid) return null;
+        const valid = await bcrypt.compare(password, user.passwordHash);
+        if (!valid) return null;
 
-      return {
-        id: user.id,
-        name: user.name || user.username,
-        email: user.email,
-        username: user.username,
-        role: user.role || "USER",
-      };
-    },
-  }),
-];
-
-export const authOptions = {
-  providers,
+        return {
+          id: user.id,
+          name: user.name || user.username,
+          email: user.email,
+          username: user.username,
+          role: user.role || "USER",
+        };
+      },
+    }),
+  ],
   pages: {
     signIn: "/login",
   },
@@ -76,7 +75,7 @@ export const authOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
-        token.username = user.username || user.name;
+        token.username = user.username || user.name || undefined;
         token.role = user.role || "USER";
         token.loginMethod = account?.provider || "credentials";
       }
